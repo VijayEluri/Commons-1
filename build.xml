@@ -1,0 +1,201 @@
+<!--+
+    | Commons Project build script
+    | 
+    | Author:        Sean Sawyer
+    | Modified By:   Sean Sawyer
+    | Last Modified: $Id: $
+    +-->
+<project name="Commons" default="dist" basedir=".">
+	<description>Buildfile for the Commons project</description>
+	
+	<!--+
+		| These are custom property files that are loaded into the build script. Ant
+		| properties are immutable, so these properties override any other properties
+		| defined later in the application
+		+-->
+	<property file="custom.properties" />
+	
+	<!--+
+		| Like properties defined through property files, properties may also be defined
+		| directly in the build script itself through the <property/> element.
+		| 
+		| The properties should in most all cases build upon each other in a way that
+		| mirrors the directory structures they represent.  This allows the directories
+		| to easily be manipulated by a property file override.
+		|
+		| Note that directory properties should have a .dir suffix on the property as a
+		| naming convention.
+		+-->
+	<property name="debug" value="on"/>
+	<property name="optimize" value="on"/>
+	<property name="nowarn" value="on"/>
+	
+	<property name="src.dir" location="src" />
+	<property name="src.java.dir" location="src/java" />
+	<property name="src.tests.dir" location="src/tests" />
+	<property name="build.dir" location="build" />	
+	<property name="build.junit.dir" value="${build.dir}/junit" />
+	<property name="build.junit.output.dir" value="${build.junit.dir}/output" />
+	<property name="build.junit.report.dir" value="${build.junit.dir}/report" />
+	<property name="dist.dir" location="dist" />
+	<property name="lib.dir" value="lib" />
+	
+	<property name="jar.name" value="hannonhill-commons.jar" />
+
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar" />
+		<pathelement location="${build.dir}" />
+		<pathelement path="${java.class.path}/" />
+	</path>
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build.dir}" />
+	</target>
+
+	<target name="compile" depends="init" description="compile the source ">
+		<!-- Compile the java code from ${src.dir} into ${build.dir} -->
+		<javac debug="${debug}"
+			optimize="${optimize}"
+			nowarn="${nowarn}"
+			destdir="${build.dir}">
+	    	<src path="${src.java.dir}"/>
+	    	<src path="${src.tests.dir}"/>
+			<classpath refid="classpath" />
+		</javac>
+		<!-- Copy supporting files to ${build.dir} -->
+		<copy todir="${build.dir}">
+			<fileset dir="${src.java.dir}">
+				<exclude name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.tests.dir}">
+				<exclude name="**/*.java"/>
+			</fileset>	
+		</copy>
+	</target>
+
+	<target name="dist" depends="compile" description="generate the distribution">
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist.dir}" />
+		<!-- Put everything in ${build} into the hh-commons.jar file -->
+		<jar destfile="${dist.dir}/${jar.name}" basedir="${build.dir}">
+		</jar>
+	</target>
+	
+	<target name="ensure-test-name" unless="test">
+    	<fail message="You must run this target with -Dtest=TestName"/>
+	</target>
+	
+	<!--+
+		| Run the JUnit test as defined by the property "test".
+		| 
+		| Usage: ant junit -Dtest=TEST_NAME
+		| (wildcards are allowed)
+		+-->
+	<target 
+		name="junit-single" 
+		depends="ensure-test-name, compile" 
+		description="Runs the test you specify on the command line with -Dtest=">
+		
+		<echo>Running JUnit Test: ${test}</echo>
+		<junit printsummary="withOutAndErr" fork="on">
+			<classpath>
+				<path refid="classpath"/>
+			</classpath>
+			
+			<formatter type="plain" usefile="false"/>
+			
+			<batchtest>
+				<fileset dir="${build.dir}">
+					<include name="**/${test}.class"/>
+				</fileset>
+			</batchtest>
+		</junit>
+			
+		<echo>Done running JUnit test: ${test}</echo>
+	</target>
+	
+	<!--+
+		| Run the standalone JUnit tests.
+		+-->
+	<target name="junit" depends="compile">
+		<mkdir dir="${build.junit.dir}"/>
+		<mkdir dir="${build.junit.output.dir}"/>
+		<mkdir dir="${build.junit.report.dir}"/>
+		
+		<delete>
+			<fileset dir="${build.junit.output.dir}"/>
+			<fileset dir="${build.junit.report.dir}"/>
+		</delete>
+		
+		<echo>Running the JUnit Tests</echo>
+		
+		<junit
+			printsummary="on"
+			fork="yes"
+			forkmode="perBatch"
+			showoutput="false"
+			haltonfailure="off"
+			errorproperty="junit.error"
+			failureproperty="junit.failure"
+		>
+			<classpath refid="classpath"/>
+			<formatter type="xml"/>
+			<batchtest todir="${build.junit.output.dir}">
+				<fileset dir="${build.dir}">
+					<include name="com/hannonhill/**/Test*.class"/>
+					<!-- do not test inner classes -->
+					<exclude name="**/Test*$*.class"/>
+				</fileset>
+			</batchtest>
+		</junit>
+		
+		<echo>Building JUnit report</echo>
+		
+		<junitreport todir="${build.junit.output.dir}">
+			<fileset dir="${build.junit.output.dir}">
+				<include name="TEST-*.xml"/>
+			</fileset>
+			<report format="frames" todir="${build.junit.report.dir}"/>
+		</junitreport>
+		
+		<antcall target="open-junit-report"/>
+		
+		<fail
+			if="junit.error"
+			message="JUnit completed, but there were test errors."/>
+			
+		<fail
+			if="junit.failure"
+			message="JUnit completed, but there were test failures."/>
+			
+		<echo>Done running JUnit tests</echo>
+	</target>
+	
+	<!-- Target to open the junit report in a browser -->
+	<target name="open-junit-report" if="browser">
+		<echo>Opening junit report in browser</echo>
+		
+		<!-- open the tests in a browser window -->
+		<property name="junit.report.file" location="${build.junit.report.dir}/index.html"/>
+				
+		<exec executable="/usr/bin/open" spawn="true" os="Mac OS X">
+			<arg value="${browser}"/>
+			<arg value="${junit.report.file}"/>
+		</exec>
+		<exec executable="${browser}" spawn="true" os="Microsoft Windows XP">
+			<arg value="${junit.report.file}"/>
+		</exec>
+		<exec executable="${browser}" spawn="true" os="Linux">
+			<arg value="${junit.report.file}"/>
+		</exec>
+	</target>
+
+	<target name="clean" description="clean up">
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+</project>
