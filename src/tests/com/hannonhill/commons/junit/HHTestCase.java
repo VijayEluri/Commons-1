@@ -45,7 +45,7 @@ public abstract class HHTestCase extends TestCase
     protected void setUp() throws Exception
     {
         super.setUp();
-        this.initializeLog4j();
+//        this.initializeLog4j();
     }
 
     /**
