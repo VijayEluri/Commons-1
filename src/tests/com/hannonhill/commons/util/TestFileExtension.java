@@ -93,7 +93,15 @@ public class TestFileExtension extends HHTestCase
         assertTrue(StringUtil.isEmpty(base));
         assertTrue(fileExtension.hasExtension());
         assertTrue(".htaccess".equals(extension));
-
     }
-
+    
+    public void testPreservePeriod() throws Exception
+    {
+        FileExtension ext = new FileExtension(NORMAL_FILENAME);
+        ext.setPreservePeriod(true);
+        String base = ext.getBaseName();
+        String extension = ext.getExtension();
+        assertEquals("image", base);
+        assertEquals(".jpg", extension);
+    }
 }

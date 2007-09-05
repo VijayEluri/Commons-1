@@ -83,7 +83,7 @@ public final class FileExtension
                 {
                     extension = name.substring(extensionIndex);
 
-                    int endIndex = extensionIndex - 1;
+                    int endIndex = extensionIndex;
                     if (endIndex < 0)
                     {
                         endIndex = 0;
