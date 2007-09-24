@@ -49,32 +49,27 @@ public final class StringUtil
      */
     public static final String concat(Object... objects)
     {
-        if (objects == null || objects.length == 0)
-        {
+        if (objects == null)
             return null;
-        }
-        StringBuilder builder = new StringBuilder(objects.length * ASSUMED_AVERAGE_STRING_LENGTH);
 
-        for (Object object : objects)
+        int length = objects.length;
+
+        if (length == 0)
+            return null;
+
+        StringBuilder builder = new StringBuilder(length * ASSUMED_AVERAGE_STRING_LENGTH);
+
+        for (int idx = 0, n = objects.length; idx < n; idx++)
         {
+            Object object = objects[idx];
             if (object == null)
-            {
                 continue;
-            }
 
-            String string;
             if (object instanceof String)
-            {
-                string = (String) object;
-            }
+                builder.append((String) object);
             else
-            {
-                string = object.toString();
-            }
-            if (StringUtil.isNotEmpty(string))
-            {
-                builder.append(string);
-            }
+                builder.append(object.toString());
+
         }
 
         return builder.toString();
@@ -124,7 +119,15 @@ public final class StringUtil
      */
     public static final boolean isNotEmpty(String string)
     {
-        return !isEmpty(string);
+        if (string == null)
+        {
+            return false;
+        }
+        if (string.length() == 0)
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -140,11 +143,11 @@ public final class StringUtil
         {
             return false;
         }
-        if (isNotEmpty(string))
+        if (string.length() == 0)
         {
-            return isNotEmpty(string.trim());
+            return false;
         }
-        return false;
+        return isNotEmpty(string.trim());
     }
 
     /**
@@ -155,11 +158,15 @@ public final class StringUtil
      */
     public static final boolean isEmptyTrimmed(String string)
     {
-        if (!isEmpty(string))
+        if (string == null)
         {
-            return isEmpty(string.trim());
+            return true;
         }
-        return isEmpty(string);
+        if (string.length() == 0)
+        {
+            return true;
+        }
+        return isEmpty(string.trim());
     }
 
     /**
