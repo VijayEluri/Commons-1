@@ -250,4 +250,18 @@ public class JDOMUtil
             newElement.addContent((Element) child.clone());
         }
     }
+
+    /**
+     * Inserts the contents of a document into the content of an element.  This method ensures
+     * that namespaces declared on the destination element are preserved in the content being
+     * inserted.
+     * 
+     * @param toInsert the source document from which content will be taken
+     * @param destination the element into which the content will be inserted
+     */
+    public static void insertDocumentContent(Document toInsert, Element destination)
+    {
+        Element root = toInsert.detachRootElement();
+        destination.addContent(root);
+    }
 }
