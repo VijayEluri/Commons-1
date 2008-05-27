@@ -138,10 +138,11 @@ public class DateFormatter
         Calendar cal = Calendar.getInstance();
         cal.setTime(dThis);
 
-        String strDate = getShortDOW(cal.get(Calendar.DAY_OF_WEEK)) + ", " + formatDigit(cal.get(Calendar.DAY_OF_MONTH), 2) + " " + getShortMonthName(cal.get(Calendar.MONTH)) + " "
-                + (cal.get(Calendar.YEAR));
+        String strDate = getShortDOW(cal.get(Calendar.DAY_OF_WEEK)) + ", " + formatDigit(cal.get(Calendar.DAY_OF_MONTH), 2) + " "
+                + getShortMonthName(cal.get(Calendar.MONTH)) + " " + (cal.get(Calendar.YEAR));
 
-        String strTime = formatDigit(cal.get(Calendar.HOUR_OF_DAY), 2) + ":" + formatDigit(cal.get(Calendar.MINUTE), 2) + ":" + formatDigit(cal.get(Calendar.SECOND), 2) + " ";
+        String strTime = formatDigit(cal.get(Calendar.HOUR_OF_DAY), 2) + ":" + formatDigit(cal.get(Calendar.MINUTE), 2) + ":"
+                + formatDigit(cal.get(Calendar.SECOND), 2) + " ";
 
         int iOffset = (-(cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)) / (60 * 1000)) - 800;
         if (iOffset < 0)
