@@ -52,6 +52,18 @@ public class StreamReader
      */
     public String readAsString() throws IOException
     {
+        byte[] bytes = readAsByteArray();
+        return StringUtil.toString(bytes);
+    }
+
+    /**
+     * Reads the input stream and returns it as a byte array containing all data that could be read from the stream.
+     * 
+     * @return
+     * @throws IOException
+     */
+    public byte[] readAsByteArray() throws IOException
+    {
         int bufsize = 4096;
         byte[] buffer = new byte[bufsize];
         int bytesread = 0;
@@ -60,7 +72,7 @@ public class StreamReader
         {
             out.write(buffer, 0, bytesread);
         }
-        return StringUtil.toString(out.toByteArray());
-    }
 
+        return out.toByteArray();
+    }
 }
