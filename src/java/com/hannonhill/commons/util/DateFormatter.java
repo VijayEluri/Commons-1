@@ -16,15 +16,30 @@ import java.util.Locale;
  */
 public class DateFormatter
 {
-
-    /**
-     * @param date
-     * @return
-     */
-    public static String format(long date)
-    {
-        return format(new Long(date));
-    }
+	/**
+	 * Maps to {@link java.text.DateFormat} style codes. Also contains NULL code to indicate 
+	 * no date or time should be printed
+	 *  
+	 * @author johnlazos
+	 * @since 7.2
+	 */
+	public enum DateFormatEnum {
+		FULL(DateFormat.FULL), 
+		LONG(DateFormat.LONG), 
+		MEDIUM(DateFormat.MEDIUM), 
+		SHORT(DateFormat.SHORT),
+		NULL(-1);
+		
+		private final Integer typeCode;
+		
+		private DateFormatEnum(int typeCode) {
+			this.typeCode = typeCode;
+		}
+		
+		public int getTypeCode() {
+			return typeCode;
+		}
+	}
 
     /**
      * @param date
@@ -56,6 +71,50 @@ public class DateFormatter
             df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, locale);
         }
         return df.format(date);
+    }
+    
+    /**
+     * Formats date with specified date and time format styles
+     * 
+     * @param date
+     * @param dateStyle
+     * @param timeStyle
+     * @return
+     */
+    public static String format(Long date, DateFormatEnum dateStyle, DateFormatEnum timeStyle) {
+    	return format(date, dateStyle, timeStyle, null);
+    }
+    
+    /**
+     * Formats date with specified date and time format styles and locale
+     * 
+     * @param date
+     * @param dateStyle
+     * @param timeStyle
+     * @param locale
+     * @return
+     */
+    public static String format(Long date, DateFormatEnum dateStyle, DateFormatEnum timeStyle, Locale locale) {
+    	DateFormat df;
+    	
+    	if (locale == null) {
+    		if (DateFormatEnum.NULL.equals(timeStyle)) {
+    			df = DateFormat.getDateInstance(dateStyle.typeCode);
+    		} else if (DateFormatEnum.NULL.equals(dateStyle)) {
+    			df = DateFormat.getTimeInstance(timeStyle.typeCode);
+    		} else {
+    			df = DateFormat.getDateTimeInstance(dateStyle.typeCode, timeStyle.typeCode); 
+    		}
+    	} else {
+    		if (DateFormatEnum.NULL.equals(timeStyle)) {
+    			df = DateFormat.getDateInstance(dateStyle.typeCode, locale);
+    		} else if (DateFormatEnum.NULL.equals(dateStyle)) {
+    			df = DateFormat.getTimeInstance(timeStyle.typeCode, locale);
+    		} else {
+    			df = DateFormat.getDateTimeInstance(dateStyle.typeCode, timeStyle.typeCode, locale); 
+    		}
+    	}
+    	return df.format(date);
     }
 
     /**
