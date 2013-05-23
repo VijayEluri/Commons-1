@@ -355,4 +355,15 @@ public final class StringUtil
     {
         return s.replaceAll("\\s", "");
     }
+    
+    /**
+     * Removes <em>all</em> leading '/' characters from String <code>s</code>. Most common use is for stripping a single '/'.  
+     * 
+     * @param s
+     * @return returns a String with all leading '/'s removed
+     */
+    public static final String removeLeadingSlashes(String s)
+    {
+    	return removeLeadingCharacters(s,  '/');
+    }
 }
